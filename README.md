@@ -55,10 +55,20 @@ PyC2C is a Python-based post-exploitation framework designed with a Command and 
     ```bash
     whoami
     ```
-2. Change the currently active bot client
+2. Change the currently active bot client:
     
     ```
     select_bot
+    ```
+3. Clear the terminal:
+
+    ```bash
+    clear
+    ```
+4. Exit the program:
+
+    ```bash
+    exit
     ```
 
 ## Disclaimer
