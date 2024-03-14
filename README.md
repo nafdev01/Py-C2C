@@ -50,10 +50,15 @@ PyC2C is a Python-based post-exploitation framework designed with a Command and 
 
 ## Example
 
-1. Execute a shell command on slected connected client:
+1. Execute a shell command on selected connected client:
 
-    ```
+    ```bash
     whoami
+    ```
+2. Change the currently active bot client
+    
+    ```
+    select_bot
     ```
 
 ## Disclaimer
