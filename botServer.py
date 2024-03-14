@@ -36,7 +36,7 @@ class C2Server:
     def handle_client(self, connection_socket, addr):
         print(
             colored(
-                f"\nBot at {addr} reporting for duty", "cyan", "on_black", ["bold"]
+                f"\nBot at {addr} reporting for duty", "cyan", "on_grey", ["bold"]
             ),
             end="\n",
         )
@@ -46,14 +46,14 @@ class C2Server:
         while command.lower() != "exit":
             if self.active_bot:
                 command = input(
-                    colored("Enter a command: ", "magenta", "on_black", ["bold"])
+                    colored("Enter a command: ", "magenta", "on_grey", ["bold"])
                 )
             else:
                 print(
                     colored(
                         f"Select a bot to initiate command",
                         "magenta",
-                        "on_black",
+                        "on_grey",
                         ["bold"],
                     )
                 )
@@ -65,11 +65,19 @@ class C2Server:
                 continue
 
             if command.strip() == "":
-                print(colored(f"[!] Empty command", "yellow", "on_grey", ["bold"],),end="\n")
+                print(
+                    colored(
+                        f"[!] Empty command",
+                        "yellow",
+                        "on_grey",
+                        ["bold"],
+                    ),
+                    end="\n",
+                )
                 continue
 
             if command.lower().strip() == "clear":
-                os.system('cls' if os.name == 'nt' else 'clear')
+                os.system("cls" if os.name == "nt" else "clear")
                 continue
 
             self.active_bot.send(command.encode())
@@ -113,13 +121,13 @@ class C2Server:
                 print(colored("Invalid choice. Try again.", "red"))
 
     def shutdown_server(self):
-        print(colored("\n[+] Shutting down server.", "yellow", "on_black", ["bold"]))
+        print(colored("\n[+] Shutting down server.", "red", "on_grey", ["bold"]))
         for bot_id, connection_socket in self.bot_lookup.items():
             print(
                 colored(
                     f"\n[+] Shutting down the bot connection {bot_id} at {self.bot_details[bot_id]}...",
                     "yellow",
-                    "on_black",
+                    "on_grey",
                     ["bold"],
                 )
             )
@@ -144,21 +152,22 @@ class C2Server:
 
 
 def main():
-    if len(sys.argv) == 1:
-        server_port = default_port
-    elif len(sys.argv) == 2:
-        server_port = int(sys.argv[1])
-    else:
-        print(
-            colored(
-                f"You have entered too many commandline arguments. Provide the C2 server port as the first argument. The default port number is {default_port}",
-                "red",
-            )
-        )
-        return
+    parser = argparse.ArgumentParser(description="C2 Server")
+    parser.add_argument(
+        "-p", "--port", type=int, default=default_port, help="Port number"
+    )
+    args = parser.parse_args()
 
-    c2_server = C2Server(server_port)
-    c2_server.run()
+    c2_server = C2Server(args.port)
+    try:
+        c2_server.run()
+    except BrokenPipeError:
+        print(colored("Exiting...", "red", "on_grey", ["bold"]))
+        sys.exit(1)
+    except KeyboardInterrupt:
+        # handle a Keyboard Interrupt (Ctrl+C)
+        print("Keyboard Interrupt. Closing Bot Client...")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
