@@ -35,7 +35,7 @@ PyC2C is a Python-based post-exploitation framework designed with a Command and 
 1. Start the C2C server:
 
     ```
-    python botServer.py
+    python botServer.py --port <server_port>
     ```
 
 2. Configure the server settings, such as listening IP and port.
